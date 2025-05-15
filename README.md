@@ -23,7 +23,6 @@
 
 2. This SDK requires the following dependencies, so you have to add them to your project:
 
-module when you call initialize method:
 ```kotlin
 dependencies {
     // Needed for all SDK methods
