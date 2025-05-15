@@ -1,7 +1,7 @@
-# How to use the SDK  
+# How to install the SDK
 
-1. Add `inseat.aar` to your project
-    For multi-module projects, you can add the `inseat.aar` file as a dependency in your project. Follow these steps:
+1. Add the `inseat.aar` to your project
+    For multi-module projects, you can add the `inseat.aar` file as a dependency in your project, by following these steps:
     1. Create a new directory named `libs` in your project directory.
     2. Copy the `inseat.aar` file into the `libs` directory.
     3. Open your project's `settings.gradle.kts` file and add the following code:
@@ -21,7 +21,7 @@
     }
     ```
 
-2. This SDK require next dependencies, so you have to add the following dependencies to your project:
+2. This SDK requires the following dependencies, so you have to add them to your project:
 
 module when you call initialize method:
 ```kotlin
@@ -50,7 +50,7 @@ dependencies {
 }
 ```
 
-Typically SDK usage:
+# How to use the SDK
 1. Initialize the SDK
    ```kotlin
    InseatSdk.initialize(
@@ -66,3 +66,11 @@ Typically SDK usage:
 4. Call the `InseatSdk.getInstance().fetchMenus` method to get all menus.
 5. Call the `InseatSdk.getInstance().setUserData` method to choose menu.
 6. Use methods like `observeShop`, `observeProducts` observe necessary data.
+
+# Support
+If you have a feature request, or spotted a bug or a technical problem, please contact our support team.
+
+# Preconditions
+In order to access this repository you need a token to download the artifacts.
+You will also need an API KEY to use our services.
+In order to get them please contact our support team.
