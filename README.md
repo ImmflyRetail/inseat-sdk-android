@@ -36,7 +36,11 @@ This document provides comprehensive documentation for the Inseat Android SDK.
 | `createOrder`       | Creates an order and sends it to the POS application                    |
 | `observeOrders`     | Subscribes to order status updates and receives real-time notifications |
 | `cancelOrder`       | Cancels an existing order and sends information to the POS application  |
+| `fetchPromotions`  | Fetches all available promotions for the current shop                   |
+| `applyPromotions`  | Calculates applied promotions based on list of cart items and selected currency  |
+| `applyPromotion`   | Tries to apply one concrete promotion based on a list of cart items and selected currency. This method is supposed to be used when constructing promotion from Promotion Builder UI flow.    |
 | `checkPermissions`  | Checks if the SDK has necessary permissions to operate                  |
+| `getPermissionManager`| Provide PermissionManager instance. This manager makes request permission more flexible |
 
 ## Initialization Methods
 
@@ -47,12 +51,12 @@ This document provides comprehensive documentation for the Inseat Android SDK.
 **Signature:**
 
 ```kotlin
-suspend fun initialize(configuration: Configuration)
+suspend fun initialize(applicationContext: Context, configuration: Configuration)
 ```
 
 **Parameters:**
 
-- `configuration` - Configuration object containing `apiKey` and `orderConfirmationTimeoutInSeconds`
+-`applicationContext` - Application context, `configuration` - Configuration object containing `apiKey, supportedICAOs, environment, shopAutoCloseTimeoutInSeconds` and `orderConfirmationTimeoutInSeconds`
 
 **Return Type:** `Void` (throws on error)
 
@@ -211,8 +215,10 @@ suspend fun fetchCategories(): List<Category>
 **Signature:**
 
 ```kotlin
-suspend fun observeProducts(): StateFlow<List<Product>>
+suspend fun observeProducts(category: Category? = null): StateFlow<List<Product>>
 ```
+
+**Parameters:** `category` - optional argument to filter products by selected category and its subcategories
 
 **Return Type:** `StateFlow<List<Product>>` - StateFlow that emits product list updates
 
@@ -225,12 +231,12 @@ suspend fun observeProducts(): StateFlow<List<Product>>
 **Signature:**
 
 ```kotlin
-suspend fun fetchProducts(queryIds: List<Int> = emptyList()): List<Product>
+suspend fun fetchProducts(queryIds: List<Int> = emptyList(), category: Category? = null): List<Product>
 ```
 
 **Parameters:**
 
-- `queryIds` - Optional list of product IDs to fetch (if empty, all products are fetched)
+`queryIds` - Optional list of product IDs to fetch (if empty, all products are fetched), `category` - optional argument to filter products by selected category and its subcategories
 
 **Return Type:** `List<Product>` - List of Product objects
 
@@ -294,6 +300,75 @@ suspend fun cancelOrder(orderId: String, callback: (Result<Unit>) -> Unit)
 
 ---
 
+## Promotion Management Methods
+
+### `fetchPromotions`
+
+**Description:** Fetches all available promotions for the current shop.
+
+**Signature:**
+
+```kotlin
+suspend fun fetchPromotions(): List<Promotion>
+```
+
+**Parameters:**
+
+- **Android:** None
+
+**Return Type:**
+
+- **Android:** `List<Promotion>` - Array of Promotion objects
+
+**Errors:**
+
+- **Android:** None
+
+### `applyPromotions`
+
+**Description:** Calculates applied promotions based on list of cart items and selected currency.
+
+**Signature:**
+
+```kotlin
+suspend fun applyPromotions(cartItems: List<CartItem>, currency: String): PromotionResult
+```
+
+**Parameters:**
+
+- **Android:** `cartItems` - list of current cart/basket items, `currency` - currently selected shop currency
+
+**Return Type:**
+
+- **Android:** `PromotionResult` - Result object with array of applied promotions
+
+**Errors:**
+
+- **Android:** None
+
+### `applyPromotion`
+
+**Description:** Tries to apply one concrete promotion based on a list of cart items and selected currency. This method is supposed to be used when constructing promotion from Promotion Builder UI flow.
+
+**Signature:**
+
+```kotlin
+suspend fun applyPromotions(cartItems: List<CartItem>, currency: String): PromotionResult
+```
+
+**Parameters:**
+
+- **Android:** `promotion` - promotion object which we try to apply to the cart/basket, `cartItems` - list of current cart/basket items, `currency` - currently selected shop currency
+
+**Return Type:**
+
+- **Android:** `PromotionResult` - Result object with array of applied promotions (no other promotion except that one from input parameters can be returned here).
+
+**Errors:**
+
+- **Android:** None
+
+---
 ## Permission Methods
 
 ### `checkPermissions`
@@ -315,6 +390,28 @@ fun checkPermissions(activity: ComponentActivity, doOnSuccess: () -> Unit)
 
 **Errors:** `PermissionDeniedException`
 
+### `getPermissionManager` (Android Only)
+
+**Description:** his method returns the PermissionManager instance to manage permissions (request it). It is useful if you want to split requesting permissions to two steps: create the manager and request permissions later.
+
+**Android Signature:**
+
+```kotlin
+fun getPermissionManager(activity: ComponentActivity): PermissionManager
+```
+
+**Parameters:**
+
+- **Android:** `activity` - Activity context
+
+**Return Type:**
+
+- **Android:** `PermissionManager` - an interface that defines a method to check permissions.
+
+
+**Errors:**
+
+- **Android:** `PermissionDeniedException`
 ---
 
 ## Error Types
@@ -484,7 +581,7 @@ Represents SDK configuration.
 2. Add to your module's `build.gradle.kts` file the following code:
    ```kotlin
    dependencies {
-       implementation("com.immflyretail.inseat.sdk:inseat:0.1.2")
+       implementation("com.immflyretail.inseat.sdk:inseat:0.1.11")
    }
    ```
 
