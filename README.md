@@ -39,7 +39,6 @@ This document provides comprehensive documentation for the Inseat Android SDK.
 | `fetchPromotions`  | Fetches all available promotions for the current shop                   |
 | `applyPromotions`  | Calculates applied promotions based on list of cart items and selected currency  |
 | `applyPromotion`   | Tries to apply one concrete promotion based on a list of cart items and selected currency. This method is supposed to be used when constructing promotion from Promotion Builder UI flow.    |
-| `fetchPromotionCategories` | Return a list of all available promotion categories |
 | `checkPermissions`  | Checks if the SDK has necessary permissions to operate                  |
 | `getPermissionManager`| Provide PermissionManager instance. This manager makes request permission more flexible |
 
@@ -369,28 +368,6 @@ suspend fun applyPromotions(cartItems: List<CartItem>, currency: String): Promot
 
 - **Android:** None
 
-### `fetchPromotionCategories`
-
-**Description:** Method return a list of all available promotion categories.
-
-**Signature:**
-
-```kotlin
-suspend fun fetchPromotionCategories(): List<PromotionCategory>
-```
-
-**Parameters:**
-
-- **Android:** None
-
-**Return Type:**
-
-- **Android:** `List<PromotionCategory>` - Array of of all available promotion categories.
-
-**Errors:**
-
-- **Android:** None
-
 ---
 ## Permission Methods
 
@@ -495,7 +472,6 @@ Represents an order.
 - **shiftId**: `String` — Shift identifier.
 - **totalPrice**: `BigDecimal` — Total price of the order.
 - **currency**: `String` — Currency code (e.g., "EUR").
-- **appliedPromotions** `List<AppliedPromotion>` — list of applyed promotions to order.
 - **items**: `List<OrderItem>` — List of order items.
 - **status**: `OrderStatusEnum` — Status of the order.
 - **customerSeatNumber**: `String` — Customer seat number.
@@ -504,7 +480,7 @@ Represents an order.
 
 ### `OrderStatusEnum`
 
-- `PLACED`, `RECEIVED`, `PREPARING`, `CANCELLED_BY_PASSENGER`, `CANCELLED_BY_CREW`, `CANCELLED_BY_TIMEOUT`, `COMPLETED`, `REFUNDED`
+- `PLACED`, `RECEIVED`, `PREPARING`, `CANCELLED_BY_PASSENGER`, `CANCELLED_BY_CREW`, `CANCELLED_BY_TIMEOUT`, `COMPLETED`
 
 ### `OrderItem`
 
@@ -525,15 +501,15 @@ Represents a product.
 - **description**: `String` — Description.
 - **base64Image**: `String` — Image in Base64.
 - **itemType**: `Int` — Product type.
-- **prices**: `List<Money>` — List of prices in different currencies.
+- **prices**: `List<ProductPrice>` — List of prices in different currencies.
 - **startDate**: `Date` — Availability start date.
 - **endDate**: `Date` — Availability end date.
 - **quantity**: `Long` — Available quantity.
 
-### `Money`
+### `ProductPrice`
 
 - **currency**: `String` — Currency code.
-- **amount**: `BigDecimal` — Price amount.
+- **price**: `BigDecimal` — Price amount.
 
 ### `Category`
 
@@ -557,16 +533,19 @@ Represents a shop.
 
 - **id**: `String` — Shop identifier.
 - **shiftId**: `String` — Shift identifier.
-- **icao**: `String` — ICAO code of the airline operating the shop.
 - **status**: `StatusEnum` — Shop status (`OPEN`, `ORDER`, `CLOSED`).
-- **promotionIds**: `List<Int>` — A list of promotion IDs applicable in the shop.
 - **items**: `List<ShopItem>` — List of shop items.
 - **crewLastSeen**: `Date` — Last crew seen timestamp.
 
 ### `ShopItem`
 
 - **itemId**: `Int` — Item identifier.
-- **prices**: `List<Money>` — List of prices.
+- **prices**: `List<ShopItemPrice>` — List of prices.
+
+### `ShopItemPrice`
+
+- **currency**: `String` — Currency code.
+- **price**: `BigDecimal` — Price amount.
 
 ### `UserData`
 
@@ -581,101 +560,6 @@ Represents SDK configuration.
 - **apiKey**: `String` — API key for authentication.
 - **orderConfirmationTimeoutInSeconds**: `Int` — Timeout for order operations (default: 120 seconds).
 
-### `Promotion`
-
-- **promotionId**: `Int` - The unique identifier for the promotion.
-- **name**: `String` - The name of the promotion.
-- **discountText**: `String` - A textual description of the discount.
-- **applyToLowestPriced**: `Boolean` - Indicates if the discount applies to the lowest priced item.
-- **discountPercent**: `Double` - The percentage discount offered by the promotion.
-- **discountTarget**: `DiscountTarget` - The target of the discount (e.g., cart, specific items).
-- **discounts**: `List<Discount>` - A list of discounts available in different currencies.
-- **loyaltyPoints**: `Int?` - The number of loyalty points awarded by the promotion, if any.
-- **triggerType**: `TriggerType` - The type of trigger that activates the promotion (e.g., product purchase, spend limit).
-- **benefitType**: `BenefitType` - The type of benefit provided by the promotion (e.g., discount, coupon).
-- **startDate**: `Date` - The start date of the promotion.
-- **endDate**: `Date` - The end date of the promotion.
-- **discountType**: `DiscountType` - The type of discount (e.g., percentage, amount, fixed price, coupon).
-- **categories**: `List<Category>` - A list of categories associated with the promotion.
-- **items**: `List<Item>` - A list of specific items associated with the promotion.
-- **spendLimitCategoryId**: `Int?` - The category ID for spend limit promotions, if applicable.
-- **couponId**: `Int?` - The coupon ID associated with the promotion, if applicable.
-- **spendLimits**: `List<SpendLimit>` - A list of spend limits in different currencies for activating the promotion.
-
-### `Promotion.Category`
-
-- **categoryId**: `Int` - The unique identifier for the promotion category.
-- **quantity**: `Int` - Required quantity.
-
-### `Promotion.Item`
-
-- **itemMasterId**: `Int` - The master id of required product.
-- **quantity**: `Int` - Required quantity.
-
-### `Promotion.Discount`
-
-- **currency**: `String` - Currency code.
-- **discount**: `Float` - Discount.
-
-### `Promotion.SpendLimit`
-
-- **currency**: `String` - Currency code.
-- **spendLimit**: `Float` - Spend limit trigger value.
-
-### `BenefitType`
-
-- **DISCOUNT** - A direct discount on the price.
-- **COUPON** - A coupon that can be redeemed for a discount. Promotions with this benefit type don't change the cart total directly, and will be applied at checkout.
-
-### `TriggerType`
-
-- **PRODUCT_PURCHASE** - Triggered by the purchase of specific products.
-- **SPEND_LIMIT** - Triggered when a certain spending limit is reached.
-  
-### `DiscountType`
-
-- **PERCENTAGE** - A percentage-based discount
-- **AMOUNT**: - A fixed amount discount.
-- **FIXED_PRICE**: - A fixed price for the item(s).
-- **COUPON**: - A coupon-based discount.
-
-### `PromotionCategory`
-
-- **id**: `Int` - Unique identifier for the promotion category. Used to link it with [Promotion.Category.categoryId]
-- **name**: `String` - Name of the promotion category.
-- **items**: `List<Int>` - List of item master IDs of [Product].
-
-### `PromotionResult`
-
-- **appliedPromotions**: `List<AppliedPromotion>` - A list of promotions that have been applied.
-
-### `AppliedPromotion`
-
-- **promotion**: `Promotion` - The promotion that has been applied.
-- **benefitType**: `AppliedPromotion.BenefitType` - The type of benefit provided by the promotion (e.g., discount, coupon).
-- **includedProducts**: `List<AppliedPromotion.ProductData>` - A list of products that are included in the promotion.
-- **loyaltyPoints**: `Int?` - The number of loyalty points awarded by the promotion, if any.
-
-### `AppliedPromotion`
-
-- **promotion**: `Promotion` - The promotion that has been applied.
-- **benefitType**: `AppliedPromotion.BenefitType` - The type of benefit provided by the promotion (e.g., discount, coupon).
-- **includedProducts**: `List<AppliedPromotion.ProductData>` - A list of products that are included in the promotion.
-- **loyaltyPoints**: `Int?` - The number of loyalty points awarded by the promotion, if any.
-
-### `AppliedPromotion.BenefitType`
-
-- **Discount(val totalSavings: Money)**  - A discount benefit, it decrease a price directly.
-- **Coupon(val couponId: Int)** - A coupon benefit, it applies on eCrew side.
-
-### `AppliedPromotion.ProductData`
-
-- **productId**: `Int` - The unique identifier for the product. Equal to [Product.itemId].
-- **productMasterId**: `Int` - The master identifier for the product. Equal to [Product.itemMasterId]
-- **productName**: `String` - The name of the product. Equal to [Product.name]
-- **standardPrice**: `Money` - Regular price of product without any discount.
-- **appliedDiscount**: `Money?` - The discount applied to the product, if any.
-  
 ---
 
 ## How to setup sdk
